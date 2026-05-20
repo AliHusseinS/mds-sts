@@ -703,7 +703,7 @@
         </li>
         <li class="nav-item" data-tab="generators" id="nav-generators">
           <button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="9" x2="9" y2="4"></line><line x1="15" y1="9" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line></svg>
             المولدات
           </button>
         </li>
@@ -1126,14 +1126,14 @@
 
   <!-- App Core Logic JS script -->
   <script>
-    // ==========================================
+    // ==============================================================
     // إعدادات الربط السحابي الدائمة لـ Google Sheets
     // الصق رابط تطبيق الويب الخاص بك هنا ليتم تفعيله تلقائياً وبشكل دائم
-    const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbzXhgvABXdrmnymyMrYfi8PSBMyHKyVPMX8zKf-22MPHWZqH_JzeFn2WBWTPn1qh92ONw/exec"; 
-    // ==========================================
+    const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbxhGYBx-rgHdTw90sJrB9mzlV7C2b8elKTyiJxruWzB4QDwoly7pUCcAmOKM6fHmL1xNA/exec"; 
+    // ==============================================================
 
-    // إعدادات حسابات النظام والصلاحيات
-    const ACCOUNTS = {
+    // الحسابات المحلية الاحتياطية (تُستخدم فقط إذا كان رابط السحاب فارغاً لتجنب إغلاق النظام)
+    const FALLBACK_LOCAL_ACCOUNTS = {
       admin: { password: "123", role: "manager" },
       gabi: { password: "456", role: "collector" }
     };
@@ -1221,8 +1221,6 @@
       },
 
       async init() {
-        // Check session storage first for login state
-        this.checkSession();
         if (!this.state.currentUser) return;
 
         // Seeding local data
@@ -1285,6 +1283,7 @@
           this.state.currentUser = JSON.parse(session);
           document.getElementById('login-screen').style.display = 'none';
           document.getElementById('main-app-layout').style.display = 'flex';
+          this.init(); // Initialize the data load and views
         } else {
           this.state.currentUser = null;
           document.getElementById('login-screen').style.display = 'flex';
@@ -1292,34 +1291,91 @@
         }
       },
 
-      handleLogin(e) {
+      async handleLogin(e) {
         e.preventDefault();
         const userVal = document.getElementById('login-username').value.trim();
         const passVal = document.getElementById('login-password').value.trim();
         const errorMsg = document.getElementById('login-error-msg');
 
-        if (ACCOUNTS[userVal] && ACCOUNTS[userVal].password === passVal) {
-          errorMsg.style.display = 'none';
-          this.state.currentUser = {
-            username: userVal,
-            role: ACCOUNTS[userVal].role
-          };
-          
-          sessionStorage.setItem('mawlidati_session', JSON.stringify(this.state.currentUser));
-          
-          // Clear inputs
-          document.getElementById('login-username').value = '';
-          document.getElementById('login-password').value = '';
-          
-          // Show App Layout
-          document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('main-app-layout').style.display = 'flex';
-          
-          // Start App
-          this.init();
+        // Show loading spinner/state
+        const loginBtn = e.target.querySelector('button[type="submit"]');
+        const origText = loginBtn.textContent;
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'جاري التحقق...';
+
+        const apiUrl = GOOGLE_SHEETS_API_URL || localStorage.getItem('mawlidati_api_url') || null;
+
+        if (apiUrl) {
+          // SECURE BACKEND LOGIN (Google Sheets Apps Script side verification)
+          try {
+            const res = await fetch(apiUrl, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: 'login',
+                username: userVal,
+                password: passVal
+              })
+            });
+            const data = await res.json();
+
+            if (data && data.status === 'success') {
+              errorMsg.style.display = 'none';
+              this.state.currentUser = {
+                username: userVal,
+                role: data.role
+              };
+              sessionStorage.setItem('mawlidati_session', JSON.stringify(this.state.currentUser));
+              
+              document.getElementById('login-username').value = '';
+              document.getElementById('login-password').value = '';
+              
+              this.checkSession();
+            } else {
+              errorMsg.textContent = data.message || 'اسم المستخدم أو كلمة المرور غير صحيحة!';
+              errorMsg.style.display = 'flex';
+            }
+          } catch (err) {
+            console.error(err);
+            // Fallback offline login in case of network breakdown
+            if (FALLBACK_LOCAL_ACCOUNTS[userVal] && FALLBACK_LOCAL_ACCOUNTS[userVal].password === passVal) {
+              errorMsg.style.display = 'none';
+              this.state.currentUser = {
+                username: userVal,
+                role: FALLBACK_LOCAL_ACCOUNTS[userVal].role
+              };
+              sessionStorage.setItem('mawlidati_session', JSON.stringify(this.state.currentUser));
+              
+              document.getElementById('login-username').value = '';
+              document.getElementById('login-password').value = '';
+              
+              this.checkSession();
+            } else {
+              errorMsg.textContent = 'تعذر الاتصال بالسحاب، وكلمة المرور الاحتياطية غير صحيحة!';
+              errorMsg.style.display = 'flex';
+            }
+          }
         } else {
-          errorMsg.style.display = 'flex';
+          // OFFLINE FALLBACK (If API URL not configured yet)
+          if (FALLBACK_LOCAL_ACCOUNTS[userVal] && FALLBACK_LOCAL_ACCOUNTS[userVal].password === passVal) {
+            errorMsg.style.display = 'none';
+            this.state.currentUser = {
+              username: userVal,
+              role: FALLBACK_LOCAL_ACCOUNTS[userVal].role
+            };
+            sessionStorage.setItem('mawlidati_session', JSON.stringify(this.state.currentUser));
+            
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            
+            this.checkSession();
+          } else {
+            errorMsg.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة!';
+            errorMsg.style.display = 'flex';
+          }
         }
+
+        loginBtn.disabled = false;
+        loginBtn.textContent = origText;
       },
 
       handleLogout() {
