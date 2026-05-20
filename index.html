@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مولدتي - نظام إدارة المولدات الأهلية سحابياً</title>
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Premium CSS Variables & Reset */
+    :root {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --primary-rgb: 139, 92, 246;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+    /* Layout Styles */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: 260px;
+      background-color: var(--bg-card);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .brand svg {
+      width: 32px;
+      height: 32px;
+      color: var(--primary);
+      filter: drop-shadow(0 0 8px rgba(var(--primary-rgb), 0.5));
+    }
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+    .nav-item button {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: right;
+    }
+    .nav-item button:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+    .nav-item.active button {
+      background-color: var(--primary);
+      color: var(--text-main);
+      box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+    }
+    .nav-item button svg {
+      width: 20px;
+      height: 20px;
+    }
+    /* Main Content Area */
+    main.content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    header.topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+    }
+    /* Form Controls */
+    .select-generator-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      padding: 0.5rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+    }
+    select, input, textarea {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--text-main);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-outline {
+      background: none;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .btn-success {
+      background-color: var(--success);
+      color: var(--text-main);
+    }
+    .btn-success:hover {
+      opacity: 0.9;
+    }
+    .btn-danger {
+      background-color: var(--danger);
+      color: var(--text-main);
+    }
+    .btn-danger:hover {
+      opacity: 0.9;
+    }
+    .btn-icon {
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+    }
+    /* Cards & Grid Layouts */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card.primary {
+      background: linear-gradient(135deg, var(--bg-card), rgba(var(--primary-rgb), 0.15));
+      border-color: rgba(var(--primary-rgb), 0.3);
+    }
+    .stat-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 900;
+    }
+    .stat-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-success { background-color: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-warning { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .badge-danger { background-color: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .badge-secondary { background-color: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--border-color);
+      font-size: 0.875rem;
+    }
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+    /* List Filter Bars */
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      background-color: var(--bg-card);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+    }
+    .filter-bar .search-input {
+      flex: 1;
+      min-width: 200px;
+    }
+    /* Modals & Dialogs */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+      transform: scale(0.9);
+      transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-content {
+      transform: scale(1);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .modal-close svg {
+      width: 24px;
+      height: 24px;
+    }
+    /* CSS-only SVG Chart */
+    .chart-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      height: 220px;
+    }
+    /* Grid layout for cards */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .item-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: border-color 0.2s;
+    }
+    .item-card:hover {
+      border-color: var(--primary);
+    }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .item-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .item-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .item-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.75rem;
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    /* Realistic Paper Thermal Receipt */
+    .receipt {
+      background-color: #ffffff;
+      color: #000000;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 24px;
+      width: 100%;
+      max-width: 320px;
+      border-left: 2px dashed #cbd5e1;
+      border-right: 2px dashed #cbd5e1;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      margin: 1rem auto;
+      text-align: center;
+      position: relative;
+    }
+    .receipt-title {
+      font-family: var(--font-family);
+      font-weight: 900;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .receipt table {
+      color: #000000;
+      text-align: right;
+    }
+    .receipt th, .receipt td {
+      border: none;
+      padding: 0.35rem 0;
+      font-size: 0.8rem;
+    }
+    .receipt tr.total-row {
+      border-top: 1px solid #000;
+      font-weight: bold;
+    }
+    .receipt tr.total-row td {
+      padding-top: 0.5rem;
+    }
+    .receipt .invoice-number-box {
+      border: 2px solid #000;
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      font-weight: bold;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+    /* Print Styles Override */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .receipt-modal-container, .receipt-modal-container * {
+        visibility: visible;
+      }
+      .receipt-modal-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .receipt-modal-actions {
+        display: none;
+      }
+      .receipt {
+        border: none;
+        box-shadow: none;
+        width: 58mm;
+        padding: 4mm;
+        margin: 0;
+      }
+    }
+    /* Bottom Nav for Mobile */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+      }
+      aside.sidebar {
+        width: 100%;
+        height: auto;
+        border-left: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+        position: relative;
+      }
+      .nav-links {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+      .nav-item button {
+        white-space: nowrap;
+        padding: 0.5rem 0.85rem;
+        font-size: 0.9rem;
+      }
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+      main.content {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <!-- SVG Zap Icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span>مولدتي</span>
+      </div>
+      <ul class="nav-links">
+        <li class="nav-item active" data-tab="dashboard">
+          <button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+            لوحة التحكم
+          </button>
+        </li>
+        <li class="nav-item" data-tab="subscribers">
+          <button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            المشتركين
+          </button>
+        </li>
+        <li class="nav-item" data-tab="invoices">
+          <button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+            الجباية والفواتير
+          </button>
+        </li>
+        <li class="nav-item" data-tab="expenses">
+          <button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            المصاريف
+          </button>
+        </li>
+        <li class="nav-item" data-tab="generators">
+          <button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line></svg>
+            المولدات
+          </button>
+        </li>
+        <li class="nav-item" data-tab="backup">
+          <button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            الربط والنسخ
+          </button>
+        </li>
+      </ul>
+    </aside>
+    <!-- Main Content -->
+    <main class="content">
+      <header class="topbar">
+        <h1 class="page-title" id="page-title-text">لوحة التحكم</h1>
+        
+        <!-- Cloud Sync & Generator Status -->
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <div id="sync-status-indicator" class="badge badge-secondary" style="display: flex; align-items: center; gap: 0.25rem;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-muted); display: inline-block;"></span>
+            <span>محلي فقط</span>
+          </div>
+          <div class="select-generator-container">
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted)">المولدة النشطة:</label>
+            <select id="active-generator-select" onchange="MawlidatiApp.switchGenerator(this.value)">
+              <!-- Options added dynamically -->
+            </select>
+          </div>
+        </div>
+      </header>
+      <!-- View Containers -->
+      <section id="view-dashboard" class="tab-view">
+        <!-- Stats Widgets -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-title">المطلوب الكلي لشهر الجباية</span>
+            <span class="stat-value" id="stat-total-expected">0 د.ع</span>
+            <span class="stat-desc">مجموع الفواتير المصدرة للشهر المختار</span>
+          </div>
+          <div class="stat-card primary">
+            <span class="stat-title">المبلغ المُحصّل</span>
+            <span class="stat-value text-success" id="stat-total-collected">0 د.ع</span>
+            <span class="stat-desc" id="stat-collection-rate">نسبة التحصيل: 0%</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-title text-danger">الديون المتبقية بذمة المشتركين</span>
+            <span class="stat-value text-danger" id="stat-total-debt">0 د.ع</span>
+            <span class="stat-desc">المبالغ غير المسددة مع الديون المتراكمة</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-title">أرباح المولد الصافية</span>
+            <span class="stat-value text-primary" id="stat-net-profit">0 د.ع</span>
+            <span class="stat-desc" id="stat-total-expenses">إجمالي المصاريف: 0 د.ع</span>
+          </div>
+        </div>
+        <div class="dashboard-layout">
+          <!-- Recent Transactions -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">أحدث المقبوضات والوصولات</h3>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>المشترك</th>
+                    <th>أبو الخبطة</th>
+                    <th>المبلغ المستلم</th>
+                    <th>التاريخ</th>
+                    <th>الخيار</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-recent-transactions">
+                  <!-- Generated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- Pie Chart Visualization -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">حالة الفواتير للشهر الجاري</h3>
+            </div>
+            <div class="chart-container" id="invoice-pie-chart-box">
+              <!-- Custom SVG Pie Chart generated dynamically -->
+            </div>
+            <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.85rem">
+              <div style="display: flex; align-items: center; gap: 0.25rem"><span style="width: 12px; height: 12px; border-radius: 2px; background-color: var(--success)"></span> مدفوع</div>
+              <div style="display: flex; align-items: center; gap: 0.25rem"><span style="width: 12px; height: 12px; border-radius: 2px; background-color: var(--warning)"></span> جزئي</div>
+              <div style="display: flex; align-items: center; gap: 0.25rem"><span style="width: 12px; height: 12px; border-radius: 2px; background-color: var(--danger)"></span> غير مدفوع</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Subscribers View -->
+      <section id="view-subscribers" class="tab-view" style="display: none;">
+        <div class="filter-bar">
+          <input type="text" id="subscriber-search" class="search-input" placeholder="البحث بالاسم أو صاحب القاطع..." oninput="MawlidatiApp.renderSubscribers()">
+          <button class="btn btn-primary" onclick="MawlidatiApp.openSubscriberModal()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            إضافة مشترك
+          </button>
+        </div>
+        <div class="items-grid" id="subscribers-list-box">
+          <!-- Loaded dynamically -->
+        </div>
+      </section>
+      <!-- Invoices View -->
+      <section id="view-invoices" class="tab-view" style="display: none;">
+        <div class="filter-bar">
+          <div class="form-group" style="margin: 0; min-width: 140px;">
+            <input type="month" id="invoice-month-filter" onchange="MawlidatiApp.renderInvoices()" dir="ltr">
+          </div>
+          <div class="form-group" style="margin: 0; min-width: 140px;">
+            <select id="invoice-status-filter" onchange="MawlidatiApp.renderInvoices()">
+              <option value="all">كل الحالات</option>
+              <option value="paid">مدفوع</option>
+              <option value="partial">جزئي</option>
+              <option value="unpaid">غير مدفوع</option>
+            </select>
+          </div>
+          <div style="flex: 1"></div>
+          <button class="btn btn-outline" onclick="MawlidatiApp.bulkGenerateInvoices()">
+            توليد فواتير الشهر
+          </button>
+          <button class="btn btn-primary" onclick="MawlidatiApp.openRecordPaymentModal()">
+            تسجيل دفعة وجباية
+          </button>
+        </div>
+        
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم القائمة</th>
+                  <th>المشترك</th>
+                  <th>صاحب القاطع</th>
+                  <th>الأمبيرية</th>
+                  <th>المطلوب الكلي</th>
+                  <th>المبلغ المستلم</th>
+                  <th>الحالة</th>
+                  <th>الخيارات</th>
+                </tr>
+              </thead>
+              <tbody id="invoices-table-body">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <!-- Expenses View -->
+      <section id="view-expenses" class="tab-view" style="display: none;">
+        <div class="filter-bar">
+          <h3 class="card-title" style="align-self: center">قائمة مصاريف المولد</h3>
+          <div style="flex: 1"></div>
+          <button class="btn btn-primary" onclick="MawlidatiApp.openExpenseModal()">
+            تسجيل مصروف جديد
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>التاريخ</th>
+                  <th>نوع المصروف</th>
+                  <th>القيمة (IQD)</th>
+                  <th>ملاحظات</th>
+                  <th>خيارات</th>
+                </tr>
+              </thead>
+              <tbody id="expenses-table-body">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <!-- Generators View -->
+      <section id="view-generators" class="tab-view" style="display: none;">
+        <div class="filter-bar">
+          <h3 class="card-title" style="align-self: center">المولدات المسجلة</h3>
+          <div style="flex: 1"></div>
+          <button class="btn btn-primary" onclick="MawlidatiApp.openGeneratorModal()">
+            إضافة مولد جديد
+          </button>
+        </div>
+        <div class="items-grid" id="generators-list-box">
+          <!-- Loaded dynamically -->
+        </div>
+      </section>
+      <!-- Data Backup & Google Sheets Integration View -->
+      <section id="view-backup" class="tab-view" style="display: none;">
+        <!-- Cloud Integration Setup -->
+        <div class="card" style="border-color: rgba(var(--primary-rgb), 0.4); background: linear-gradient(180deg, var(--bg-card), rgba(var(--primary-rgb), 0.03))">
+          <h3 class="card-title" style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-.01M9 10h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path></svg>
+            ربط سحابي بـ Google Sheets
+          </h3>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem">
+            يمكنك حفظ ومزامنة قاعدة بيانات المولد والمشتركين كاملةً على حسابك في Google Drive باستخدام جدول بيانات Google Sheets. سيعمل هذا كمستودع تخزين سحابي مجاني وموثوق للمزامنة التلقائية.
+          </p>
+          <form onsubmit="MawlidatiApp.saveCloudSettings(event)">
+            <div class="form-group">
+              <label for="cloud-api-url">رابط تطبيق الويب الموزع من Google Apps Script (Web App URL)</label>
+              <input type="url" id="cloud-api-url" placeholder="https://script.google.com/macros/s/.../exec" style="text-align: left;" dir="ltr">
+            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+              <button type="submit" class="btn btn-primary">حفظ رابط المزامنة</button>
+              <button type="button" class="btn btn-outline" onclick="MawlidatiApp.testCloudConnection()">اختبار الاتصال والمزامنة الآن</button>
+              <button type="button" class="btn btn-danger" onclick="MawlidatiApp.disconnectCloud()">فصل المزامنة السحابية</button>
+            </div>
+          </form>
+        </div>
+        <!-- Local Backup -->
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 1rem">نسخ احتياطي يدوي (ملفات محليّة)</h3>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem">
+            تصدير واستيراد البيانات كملفات يدوية للكمبيوتر لتجنب فقدان الحسابات.
+          </p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-outline" onclick="MawlidatiApp.exportBackupData()">تصدير نسخة احتياطية (JSON)</button>
+            <label class="btn btn-outline" style="position: relative; overflow: hidden; display: inline-flex; align-items: center">
+              استيراد نسخة احتياطية
+              <input type="file" id="backup-file-input" style="position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;" onchange="MawlidatiApp.importBackupData(event)">
+            </label>
+            <button class="btn btn-danger" onclick="MawlidatiApp.resetAllDatabase()">تصفير وتطهير النظام المحلي</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <!-- Dialog Modals -->
+  
+  <!-- Subscriber Form Modal -->
+  <div class="modal-overlay" id="subscriber-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="subscriber-modal-title">مشترك جديد</h3>
+        <button class="modal-close" onclick="MawlidatiApp.closeModal('subscriber-modal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="subscriber-form" onsubmit="MawlidatiApp.saveSubscriber(event)">
+        <input type="hidden" id="subscriber-id">
+        <div class="form-group">
+          <label for="sub-name">اسم المشترك الكامل</label>
+          <input type="text" id="sub-name" required placeholder="مثال: علي حسين صالح">
+        </div>
+        <div class="form-group">
+          <label for="sub-breaker-owner">أبو الخبطة (صاحب القاطع)</label>
+          <input type="text" id="sub-breaker-owner" required placeholder="مثال: بيت أبو محمد">
+        </div>
+        <div class="form-group">
+          <label for="sub-phone">رقم الهاتف (اختياري)</label>
+          <input type="tel" id="sub-phone" placeholder="مثال: 07701234567" style="text-align: left;" dir="ltr">
+        </div>
+        <div class="form-group">
+          <label for="sub-amperes">الأمبيرية الافتراضية</label>
+          <input type="number" id="sub-amperes" step="0.5" min="0.5" required placeholder="مثال: 5">
+        </div>
+        <div class="form-group">
+          <label for="sub-debt">الديون السابقة المتراكمة (IQD)</label>
+          <input type="number" id="sub-debt" min="0" defaultValue="0" placeholder="0">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">حفظ البيانات</button>
+      </form>
+    </div>
+  </div>
+  <!-- Record Payment Modal -->
+  <div class="modal-overlay" id="payment-modal">
+    <div class="modal-content" style="max-width: 420px">
+      <div class="modal-header">
+        <h3 class="modal-title">جباية وتسجيل دفعة مالية</h3>
+        <button class="modal-close" onclick="MawlidatiApp.closeModal('payment-modal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="payment-form" onsubmit="MawlidatiApp.savePayment(event)">
+        <div class="form-group">
+          <label for="payment-sub-select">المشترك المطلوب جباية مستحقاته</label>
+          <select id="payment-sub-select" required onchange="MawlidatiApp.onPaymentSubscriberChange(this.value)">
+            <!-- Options dynamically loaded -->
+          </select>
+        </div>
+        
+        <div id="payment-invoice-details" style="background-color: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; display: none;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem">
+            <span>الاشتراك الشهري:</span>
+            <span id="payment-monthly-cost">0 د.ع</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem">
+            <span>ديون متراكمة سابقة:</span>
+            <span id="payment-old-debts" class="text-danger">0 د.ع</span>
+          </div>
+          <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.05rem;">
+            <span>المجموع المطلوب كلياً:</span>
+            <span id="payment-total-expected" class="text-primary">0 د.ع</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="payment-amount-received">المبلغ المقبوض والمستلم (IQD)</label>
+          <input type="number" id="payment-amount-received" min="0" required placeholder="مثال: 50000" oninput="MawlidatiApp.onPaymentAmountChange(this.value)">
+        </div>
+        <div class="form-group">
+          <label for="payment-notes">ملاحظات الفاتورة</label>
+          <textarea id="payment-notes" rows="2" placeholder="أية ملاحظات إضافية..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span class="badge" id="payment-status-badge">غير مدفوع</span>
+          <span style="font-size: 0.85rem; color: var(--text-muted)">
+            المتبقي ديناً: <span id="payment-balance-remaining" style="font-weight: 700">0 د.ع</span>
+          </span>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">حفظ الدفعة وتصدير الوصل</button>
+      </form>
+    </div>
+  </div>
+  <!-- Interactive Receipt Modal -->
+  <div class="modal-overlay" id="receipt-modal">
+    <div class="modal-content receipt-modal-container" style="max-width: 360px; padding: 1.5rem;">
+      <div class="modal-header receipt-modal-actions">
+        <h3 class="modal-title">وصل استلام الجباية</h3>
+        <button class="modal-close" onclick="MawlidatiApp.closeModal('receipt-modal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      
+      <!-- Rendered Receipt Container -->
+      <div id="receipt-print-wrapper">
+        <!-- Rendered in javascript -->
+      </div>
+    </div>
+  </div>
+  <!-- Expense Form Modal -->
+  <div class="modal-overlay" id="expense-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="expense-modal-title">تسجيل مصروف</h3>
+        <button class="modal-close" onclick="MawlidatiApp.closeModal('expense-modal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="expense-form" onsubmit="MawlidatiApp.saveExpense(event)">
+        <input type="hidden" id="expense-id">
+        <div class="form-group">
+          <label for="exp-type">نوع المصروف / البيان</label>
+          <input type="text" id="exp-type" required placeholder="مثال: وقود كاز، تصليح محرك المولد...">
+        </div>
+        <div class="form-group">
+          <label for="exp-amount">القيمة المصروفة (IQD)</label>
+          <input type="number" id="exp-amount" min="1" required placeholder="0">
+        </div>
+        <div class="form-group">
+          <label for="exp-date">تاريخ الصرف</label>
+          <input type="date" id="exp-date" required>
+        </div>
+        <div class="form-group">
+          <label for="exp-notes">ملاحظات إضافية</label>
+          <textarea id="exp-notes" rows="2" placeholder="أي تفاصيل أخرى..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">حفظ المصروف</button>
+      </form>
+    </div>
+  </div>
+  <!-- Generator Form Modal -->
+  <div class="modal-overlay" id="generator-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="generator-modal-title">مولد جديد</h3>
+        <button class="modal-close" onclick="MawlidatiApp.closeModal('generator-modal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="generator-form" onsubmit="MawlidatiApp.saveGenerator(event)">
+        <input type="hidden" id="generator-id">
+        <div class="form-group">
+          <label for="gen-name">اسم المولد</label>
+          <input type="text" id="gen-name" required placeholder="مثال: مولدة حي النور 1">
+        </div>
+        <div class="form-group">
+          <label for="gen-price">سعر الأمبير الواحد (IQD)</label>
+          <input type="number" id="gen-price" required placeholder="مثال: 12000">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">حفظ المولد</button>
+      </form>
+    </div>
+  </div>
+  <!-- App Core Logic JS script -->
+  <script>
+    // Local DB management using LocalStorage
+    const DB = {
+      get(key, defaultVal = []) {
+        const data = localStorage.getItem('mawlidati_' + key);
+        return data ? JSON.parse(data) : defaultVal;
+      },
+      save(key, data) {
+        localStorage.setItem('mawlidati_' + key, JSON.stringify(data));
+      },
+      clear() {
+        const keys = ['generators', 'subscribers', 'invoices', 'expenses', 'settings'];
+        keys.forEach(k => localStorage.removeItem('mawlidati_' + k));
+      },
+      exportBackup() {
+        return {
+          generators: this.get('generators'),
+          subscribers: this.get('subscribers'),
+          invoices: this.get('invoices'),
+          expenses: this.get('expenses')
+        };
+      },
+      importBackup(data) {
+        if (data.generators) this.save('generators', data.generators);
+        if (data.subscribers) this.save('subscribers', data.subscribers);
+        if (data.invoices) this.save('invoices', data.invoices);
+        if (data.expenses) this.save('expenses', data.expenses);
+      }
+    };
+    // Helper functions for formatters
+    function formatCurrency(iqdAmount) {
+      return Number(iqdAmount).toLocaleString('ar-IQ') + ' د.ع';
+    }
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    // Seeding initial database data if blank
+    function seedInitialData() {
+      if (DB.get('generators').length === 0) {
+        const defaultGenerators = [
+          { id: 1, name: "مولدة القدس الأهلية", pricePerAmpere: 12000, createdAt: new Date().toISOString() }
+        ];
+        const defaultSubscribers = [
+          { id: 1, name: "حسين جاسم كريم", breakerOwnerName: "بيت أبو جاسم", phoneNumber: "07701234567", generatorId: 1, defaultAmperes: 5, status: "active", currentDebt: 24000, createdAt: new Date().toISOString() },
+          { id: 2, name: "سعد عبد الرضا جعفر", breakerOwnerName: "بيت سعد", phoneNumber: "07802345678", generatorId: 1, defaultAmperes: 10, status: "active", currentDebt: 0, createdAt: new Date().toISOString() },
+          { id: 3, name: "مريم علي حيدر", breakerOwnerName: "شقة مريم", phoneNumber: "07503456789", generatorId: 1, defaultAmperes: 3, status: "active", currentDebt: 0, createdAt: new Date().toISOString() },
+          { id: 4, name: "عبد الله حامد محمد", breakerOwnerName: "بيت أبو عبد الله", phoneNumber: "07709876543", generatorId: 1, defaultAmperes: 6, status: "paused", currentDebt: 50000, createdAt: new Date().toISOString() }
+        ];
+        
+        const currentMonthYear = new Date().toISOString().slice(0, 7); // YYYY-MM
+        const defaultInvoices = [
+          { id: 1, subscriberId: 1, generatorId: 1, amperes: 5, previousDebt: 24000, amountExpected: 84000, amountReceived: 60000, monthYear: currentMonthYear, status: "partial", notes: "دفع جزء من المبلغ المستحق", createdAt: new Date().toISOString() },
+          { id: 2, subscriberId: 2, generatorId: 1, amperes: 10, previousDebt: 0, amountExpected: 120000, amountReceived: 120000, monthYear: currentMonthYear, status: "paid", notes: "دفع كامل الحساب", createdAt: new Date().toISOString() }
+        ];
+        const defaultExpenses = [
+          { id: 1, generatorId: 1, expenseType: "شراء وقود كاز", amount: 450000, date: new Date().toISOString().split('T')[0], notes: "شراء برميل كاز", createdAt: new Date().toISOString() },
+          { id: 2, generatorId: 1, expenseType: "أجور تصليح فلتر", amount: 35000, date: new Date().toISOString().split('T')[0], notes: "تصليح فلاتر الديزل", createdAt: new Date().toISOString() }
+        ];
+        DB.save('generators', defaultGenerators);
+        DB.save('subscribers', defaultSubscribers);
+        DB.save('invoices', defaultInvoices);
+        DB.save('expenses', defaultExpenses);
+        DB.save('settings', { activeGeneratorId: 1, currentMonthYear: currentMonthYear });
+      }
+    }
+    // App core module
+    const MawlidatiApp = {
+      state: {
+        activeGeneratorId: null,
+        currentMonthYear: new Date().toISOString().slice(0, 7),
+        activeTab: 'dashboard',
+        apiUrl: null
+      },
+      async init() {
+        // Seeding local data
+        seedInitialData();
+        // Load Settings
+        const settings = DB.get('settings', {});
+        this.state.activeGeneratorId = settings.activeGeneratorId || (DB.get('generators')[0]?.id || null);
+        this.state.currentMonthYear = settings.currentMonthYear || new Date().toISOString().slice(0, 7);
+        this.state.apiUrl = localStorage.getItem('mawlidati_api_url') || null;
+        // Update UI Cloud Inputs
+        if (this.state.apiUrl) {
+          document.getElementById('cloud-api-url').value = this.state.apiUrl;
+        }
+        // Setup Event Listeners for Nav
+        document.querySelectorAll('.nav-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const tabName = item.getAttribute('data-tab');
+            MawlidatiApp.switchTab(tabName);
+          });
+        });
+        // Set date input values to today's month
+        document.getElementById('invoice-month-filter').value = this.state.currentMonthYear;
+        // Try syncing from cloud if link configured
+        if (this.state.apiUrl) {
+          this.setSyncStatus('syncing', 'جاري جلب البيانات سحابياً...');
+          await this.pullFromCloud();
+        } else {
+          this.setSyncStatus('local', 'محلي فقط');
+        }
+        
+        // Populate dropdown & Render Active Tab View
+        this.renderGeneratorDropdown();
+        this.renderView();
+      },
+      setSyncStatus(status, text) {
+        const indicator = document.getElementById('sync-status-indicator');
+        const dot = indicator.querySelector('span');
+        const label = indicator.querySelector('span + span');
+        indicator.className = 'badge';
+        label.textContent = text;
+        if (status === 'synced') {
+          indicator.classList.add('badge-success');
+          dot.style.backgroundColor = 'var(--success)';
+        } else if (status === 'syncing') {
+          indicator.classList.add('badge-warning');
+          dot.style.backgroundColor = 'var(--warning)';
+        } else if (status === 'local') {
+          indicator.classList.add('badge-secondary');
+          dot.style.backgroundColor = 'var(--text-muted)';
+        } else if (status === 'error') {
+          indicator.classList.add('badge-danger');
+          dot.style.backgroundColor = 'var(--danger)';
+        }
+      },
+      // Fetch and merge data from Google Sheets API
+      async pullFromCloud() {
+        if (!this.state.apiUrl) return;
+        try {
+          const res = await fetch(this.state.apiUrl);
+          if (!res.ok) throw new Error('فشل جلب البيانات من المخدم');
+          
+          const data = await res.json();
+          if (data && data.generators && data.subscribers && data.invoices) {
+            DB.importBackup(data);
+            
+            // Re-resolve active generator if invalid after import
+            const gens = DB.get('generators');
+            if (gens.length > 0 && !gens.find(g => g.id === this.state.activeGeneratorId)) {
+              this.state.activeGeneratorId = gens[0].id;
+            }
+            this.setSyncStatus('synced', 'سحابي متصل ومحدث');
+            return true;
+          } else {
+            throw new Error('تنسيق البيانات السحابية غير صالح');
+          }
+        } catch (err) {
+          console.error(err);
+          this.setSyncStatus('error', 'خطأ في المزامنة السحابية');
+          return false;
+        }
+      },
+      // Push all database tables to Google Sheets
+      async pushToCloud() {
+        if (!this.state.apiUrl) return;
+        this.setSyncStatus('syncing', 'جاري المزامنة مع السحاب...');
+        try {
+          const dbState = DB.exportBackup();
+          const response = await fetch(this.state.apiUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'sync',
+              data: dbState
+            })
+          });
+          // Google Web App redirection could return opaque text response or status success
+          // By standard simple request, if we bypass CORS headers, it still updates perfectly.
+          this.setSyncStatus('synced', 'تم الحفظ والمزامنة');
+        } catch (err) {
+          console.error(err);
+          this.setSyncStatus('error', 'محفوظ محلياً (فشلت المزامنة)');
+        }
+      },
+      // Wrapper to save table locally and sync to cloud in background
+      async persistTable(key, data) {
+        DB.save(key, data);
+        if (this.state.apiUrl) {
+          await this.pushToCloud();
+        }
+      },
+      renderGeneratorDropdown() {
+        const select = document.getElementById('active-generator-select');
+        const generators = DB.get('generators');
+        select.innerHTML = '';
+        
+        generators.forEach(gen => {
+          const opt = document.createElement('option');
+          opt.value = gen.id;
+          opt.textContent = gen.name;
+          if (Number(gen.id) === Number(this.state.activeGeneratorId)) {
+            opt.selected = true;
+          }
+          select.appendChild(opt);
+        });
+      },
+      switchGenerator(id) {
+        this.state.activeGeneratorId = Number(id);
+        const settings = DB.get('settings', {});
+        settings.activeGeneratorId = Number(id);
+        DB.save('settings', settings);
+        
+        // Re-render current view
+        this.renderView();
+      },
+      switchTab(tabName) {
+        document.querySelectorAll('.nav-item').forEach(item => {
+          if (item.getAttribute('data-tab') === tabName) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+        // Hide all views
+        document.querySelectorAll('.tab-view').forEach(view => {
+          view.style.display = 'none';
+        });
+        // Show selected view
+        const targetView = document.getElementById('view-' + tabName);
+        if (targetView) targetView.style.display = 'block';
+        this.state.activeTab = tabName;
+        // Update top bar title
+        const titles = {
+          dashboard: 'لوحة التحكم',
+          subscribers: 'المشتركين',
+          invoices: 'الجباية والفواتير',
+          expenses: 'المصاريف',
+          generators: 'المولدات',
+          backup: 'الربط والنسخ الاحتياطي'
+        };
+        document.getElementById('page-title-text').textContent = titles[tabName] || '';
+        this.renderView();
+      },
+      renderView() {
+        if (this.state.activeTab === 'dashboard') {
+          this.renderDashboard();
+        } else if (this.state.activeTab === 'subscribers') {
+          this.renderSubscribers();
+        } else if (this.state.activeTab === 'invoices') {
+          this.renderInvoices();
+        } else if (this.state.activeTab === 'expenses') {
+          this.renderExpenses();
+        } else if (this.state.activeTab === 'generators') {
+          this.renderGenerators();
+        }
+      },
+      // --- CLOUD SETUP ACTIONS ---
+      saveCloudSettings(e) {
+        e.preventDefault();
+        const url = document.getElementById('cloud-api-url').value.trim();
+        if (url) {
+          localStorage.setItem('mawlidati_api_url', url);
+          this.state.apiUrl = url;
+          alert('تم حفظ رابط الـ API للربط السحابي بنجاح!');
+          this.init();
+        } else {
+          alert('الرجاء إدخال رابط صالح');
+        }
+      },
+      async testCloudConnection() {
+        const url = document.getElementById('cloud-api-url').value.trim();
+        if (!url) {
+          alert('يرجى إدخال رابط API أولاً');
+          return;
+        }
+        this.state.apiUrl = url;
+        localStorage.setItem('mawlidati_api_url', url);
+        
+        this.setSyncStatus('syncing', 'جاري فحص الاتصال...');
+        const success = await this.pullFromCloud();
+        
+        if (success) {
+          alert('تم الاتصال وجلب البيانات من Google Sheets بنجاح بنسبة 100%!');
+          this.renderGeneratorDropdown();
+          this.renderView();
+        } else {
+          alert('تعذر الاتصال بـ Google Sheets. يرجى التأكد من نشر الكود كـ Web App ومنح الصلاحيات لـ "Anyone".');
+        }
+      },
+      disconnectCloud() {
+        if (confirm('هل أنت متأكد من فصل الربط السحابي؟ سيعود النظام للعمل بشكل محلي فقط.')) {
+          localStorage.removeItem('mawlidati_api_url');
+          this.state.apiUrl = null;
+          document.getElementById('cloud-api-url').value = '';
+          this.setSyncStatus('local', 'محلي فقط');
+          alert('تم إلغاء الربط السحابي بنجاح.');
+        }
+      },
+      // --- DASHBOARD ACTIONS ---
+      renderDashboard() {
+        const invoices = DB.get('invoices');
+        const subscribers = DB.get('subscribers');
+        const expenses = DB.get('expenses');
+        const generators = DB.get('generators');
+        
+        const genId = this.state.activeGeneratorId;
+        const currentMonth = this.state.currentMonthYear;
+        // Filter invoices & expenses for current generator & month
+        const genInvoices = invoices.filter(inv => Number(inv.generatorId) === Number(genId) && inv.monthYear === currentMonth);
+        const genExpenses = expenses.filter(exp => Number(exp.generatorId) === Number(genId) && exp.date.startsWith(currentMonth));
+        
+        let totalExpected = 0;
+        let totalCollected = 0;
+        let paidCount = 0;
+        let partialCount = 0;
+        let unpaidCount = 0;
+        genInvoices.forEach(inv => {
+          totalExpected += Number(inv.amountExpected);
+          totalCollected += Number(inv.amountReceived);
+          if (inv.status === 'paid') paidCount++;
+          else if (inv.status === 'partial') partialCount++;
+          else unpaidCount++;
+        });
+        // Current generator subscribers total debt
+        const genSubs = subscribers.filter(sub => Number(sub.generatorId) === Number(genId));
+        let totalDebts = 0;
+        genSubs.forEach(s => {
+          totalDebts += Number(s.currentDebt);
+        });
+        // Expenses
+        let totalExpAmount = 0;
+        genExpenses.forEach(exp => {
+          totalExpAmount += Number(exp.amount);
+        });
+        const netProfit = totalCollected - totalExpAmount;
+        const colRate = totalExpected > 0 ? ((totalCollected / totalExpected) * 100).toFixed(1) : 0;
+        // Update DOM
+        document.getElementById('stat-total-expected').textContent = formatCurrency(totalExpected);
+        document.getElementById('stat-total-collected').textContent = formatCurrency(totalCollected);
+        document.getElementById('stat-collection-rate').textContent = `نسبة التحصيل: ${colRate}%`;
+        document.getElementById('stat-total-debt').textContent = formatCurrency(totalDebts);
+        document.getElementById('stat-net-profit').textContent = formatCurrency(netProfit);
+        document.getElementById('stat-total-expenses').textContent = `إجمالي المصاريف: ${formatCurrency(totalExpAmount)}`;
+        // Render Recent Transactions
+        const recentBox = document.getElementById('dashboard-recent-transactions');
+        recentBox.innerHTML = '';
+        
+        // Invoices sorted by created date desc
+        const sortedInvs = [...invoices]
+          .filter(inv => Number(inv.generatorId) === Number(genId) && inv.amountReceived > 0)
+          .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5);
+        if (sortedInvs.length === 0) {
+          recentBox.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">لا توجد مقبوضات مسجلة</td></tr>';
+        } else {
+          sortedInvs.forEach(inv => {
+            const sub = subscribers.find(s => s.id === inv.subscriberId) || { name: 'غير معروف', breakerOwnerName: 'غير معروف' };
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><span style="font-weight:700">${sub.name}</span></td>
+              <td>${sub.breakerOwnerName}</td>
+              <td class="text-success" style="font-weight:900">${formatCurrency(inv.amountReceived)}</td>
+              <td>${formatDate(inv.createdAt)}</td>
+              <td>
+                <button class="btn btn-outline btn-icon" onclick="MawlidatiApp.showReceipt(${inv.id})">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </button>
+              </td>
+            `;
+            recentBox.appendChild(tr);
+          });
+        }
+        // Render custom SVG Chart
+        const chartBox = document.getElementById('invoice-pie-chart-box');
+        chartBox.innerHTML = '';
+        
+        const totalInvs = paidCount + partialCount + unpaidCount;
+        if (totalInvs === 0) {
+          chartBox.innerHTML = '<div style="color:var(--text-muted); text-align:center;">لا توجد بيانات مخطط كافية للتحليل</div>';
+        } else {
+          // Render SVG Ring Chart (Donut)
+          const r = 50;
+          const cx = 70;
+          const cy = 70;
+          const circum = 2 * Math.PI * r;
+          
+          const pPct = paidCount / totalInvs;
+          const prPct = partialCount / totalInvs;
+          const uPct = unpaidCount / totalInvs;
+          
+          const pStroke = circum * pPct;
+          const prStroke = circum * prPct;
+          const uStroke = circum * uPct;
+          const pOffset = 0;
+          const prOffset = circum - pStroke;
+          const uOffset = circum - pStroke - prStroke;
+          const svg = `
+            <svg width="180" height="180" viewBox="0 0 140 140" style="transform: rotate(-90deg)">
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="transparent" stroke="#334155" stroke-width="12" />
+              
+              <!-- Unpaid -->
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="transparent" stroke="var(--danger)" stroke-width="12" 
+                stroke-dasharray="${uStroke} ${circum - uStroke}" 
+                stroke-dashoffset="${uOffset}" />
+              
+              <!-- Partial -->
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="transparent" stroke="var(--warning)" stroke-width="12" 
+                stroke-dasharray="${prStroke} ${circum - prStroke}" 
+                stroke-dashoffset="${prOffset}" />
+              <!-- Paid -->
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="transparent" stroke="var(--success)" stroke-width="12" 
+                stroke-dasharray="${pStroke} ${circum - pStroke}" 
+                stroke-dashoffset="${pOffset}" />
+            </svg>
+            <div style="position:absolute; font-weight:800; font-size:1.5rem">${totalInvs}</div>
+          `;
+          chartBox.innerHTML = svg;
+        }
+      },
+      // --- SUBSCRIBERS ACTIONS ---
+      renderSubscribers() {
+        const subscribers = DB.get('subscribers');
+        const genId = this.state.activeGeneratorId;
+        const searchVal = document.getElementById('subscriber-search').value.toLowerCase();
+        
+        const filtered = subscribers.filter(sub => 
+          Number(sub.generatorId) === Number(genId) && 
+          (sub.name.toLowerCase().includes(searchVal) || sub.breakerOwnerName.toLowerCase().includes(searchVal))
+        );
+        const grid = document.getElementById('subscribers-list-box');
+        grid.innerHTML = '';
+        if (filtered.length === 0) {
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding: 3rem;">لا يوجد مشتركين مسجلين</div>';
+          return;
+        }
+        filtered.forEach(sub => {
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <div class="item-header">
+              <div>
+                <span class="item-title">${sub.name}</span>
+                <div class="item-meta">صاحب القاطع: ${sub.breakerOwnerName}</div>
+                ${sub.phoneNumber ? `<div class="item-meta">الهاتف: ${sub.phoneNumber}</div>` : ''}
+              </div>
+              <span class="badge ${sub.status === 'active' ? 'badge-success' : 'badge-secondary'}">
+                ${sub.status === 'active' ? 'فعال' : 'متوقف'}
+              </span>
+            </div>
+            
+            <div class="item-footer">
+              <div style="display:flex; align-items:center; gap:0.25rem; font-weight:800; color:var(--primary)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>${sub.defaultAmperes} أمبير</span>
+              </div>
+              
+              ${sub.currentDebt > 0 
+                ? `<div style="text-align:left"><div style="font-size:0.7rem; color:var(--text-muted)">الديون</div><div style="font-weight:700; color:var(--danger)">${formatCurrency(sub.currentDebt)}</div></div>`
+                : `<span style="font-size:0.8rem; color:var(--success)">لا توجد ديون</span>`
+              }
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
+              <button class="btn btn-outline btn-icon ${sub.status === 'active' ? 'text-warning' : 'text-success'}" onclick="MawlidatiApp.toggleSubscriberStatus(${sub.id})" title="${sub.status === 'active' ? 'إيقاف مؤقت' : 'تفعيل'}">
+                ${sub.status === 'active' 
+                  ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`
+                  : `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`
+                }
+              </button>
+              <button class="btn btn-outline btn-icon" onclick="MawlidatiApp.openSubscriberModal(${sub.id})">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              </button>
+              <button class="btn btn-outline btn-icon text-danger" onclick="MawlidatiApp.deleteSubscriber(${sub.id})">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              </button>
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+      },
+      openSubscriberModal(id = null) {
+        document.getElementById('subscriber-form').reset();
+        document.getElementById('subscriber-id').value = '';
+        
+        if (id) {
+          document.getElementById('subscriber-modal-title').textContent = 'تعديل المشترك';
+          const sub = DB.get('subscribers').find(s => s.id === id);
+          if (sub) {
+            document.getElementById('subscriber-id').value = sub.id;
+            document.getElementById('sub-name').value = sub.name;
+            document.getElementById('sub-breaker-owner').value = sub.breakerOwnerName;
+            document.getElementById('sub-phone').value = sub.phoneNumber || '';
+            document.getElementById('sub-amperes').value = sub.defaultAmperes;
+            document.getElementById('sub-debt').value = sub.currentDebt;
+          }
+        } else {
+          document.getElementById('subscriber-modal-title').textContent = 'مشترك جديد';
+        }
+        
+        document.getElementById('subscriber-modal').classList.add('open');
+      },
+      closeModal(id) {
+        document.getElementById(id).classList.remove('open');
+      },
+      async saveSubscriber(e) {
+        e.preventDefault();
+        const id = document.getElementById('subscriber-id').value;
+        const name = document.getElementById('sub-name').value;
+        const breakerOwner = document.getElementById('sub-breaker-owner').value;
+        const phone = document.getElementById('sub-phone').value;
+        const amperes = Number(document.getElementById('sub-amperes').value);
+        const debt = Number(document.getElementById('sub-debt').value) || 0;
+        const subs = DB.get('subscribers');
+        if (id) {
+          // Edit mode
+          const idx = subs.findIndex(s => s.id === Number(id));
+          if (idx !== -1) {
+            subs[idx].name = name;
+            subs[idx].breakerOwnerName = breakerOwner;
+            subs[idx].phoneNumber = phone || null;
+            subs[idx].defaultAmperes = amperes;
+            subs[idx].currentDebt = debt;
+          }
+        } else {
+          // New subscriber
+          const newId = subs.length > 0 ? Math.max(...subs.map(s => s.id)) + 1 : 1;
+          subs.push({
+            id: newId,
+            name,
+            breakerOwnerName: breakerOwner,
+            phoneNumber: phone || null,
+            generatorId: this.state.activeGeneratorId,
+            defaultAmperes: amperes,
+            status: 'active',
+            currentDebt: debt,
+            createdAt: new Date().toISOString()
+          });
+        }
+        await this.persistTable('subscribers', subs);
+        this.closeModal('subscriber-modal');
+        this.renderSubscribers();
+      },
+      async toggleSubscriberStatus(id) {
+        const subs = DB.get('subscribers');
+        const idx = subs.findIndex(s => s.id === id);
+        if (idx !== -1) {
+          subs[idx].status = subs[idx].status === 'active' ? 'paused' : 'active';
+          await this.persistTable('subscribers', subs);
+          this.renderSubscribers();
+        }
+      },
+      async deleteSubscriber(id) {
+        if (confirm('هل أنت متأكد من حذف المشترك؟ سيتم إلغاء حساباته نهائياً ولا يمكن الاسترجاع.')) {
+          const subs = DB.get('subscribers').filter(s => s.id !== id);
+          DB.save('subscribers', subs);
+          
+          // clean up invoices too if any
+          const invs = DB.get('invoices').filter(inv => inv.subscriberId !== id);
+          DB.save('invoices', invs);
+          if (this.state.apiUrl) {
+            await this.pushToCloud();
+          }
+          this.renderSubscribers();
+        }
+      },
+      // --- INVOICES ACTIONS ---
+      renderInvoices() {
+        const invoices = DB.get('invoices');
+        const subscribers = DB.get('subscribers');
+        const genId = this.state.activeGeneratorId;
+        const monthFilter = document.getElementById('invoice-month-filter').value;
+        const statusFilter = document.getElementById('invoice-status-filter').value;
+        let filtered = invoices.filter(inv => 
+          Number(inv.generatorId) === Number(genId) && 
+          inv.monthYear === monthFilter
+        );
+        if (statusFilter !== 'all') {
+          filtered = filtered.filter(inv => inv.status === statusFilter);
+        }
+        const tbody = document.getElementById('invoices-table-body');
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding: 3rem;">لا توجد فواتير مطابقة للبحث</td></tr>';
+          return;
+        }
+        filtered.forEach(inv => {
+          const sub = subscribers.find(s => s.id === inv.subscriberId) || { name: 'محذوف', breakerOwnerName: 'محذوف' };
+          const tr = document.createElement('tr');
+          
+          const statusBadges = {
+            paid: '<span class="badge badge-success">مدفوع</span>',
+            partial: '<span class="badge badge-warning">جزئي</span>',
+            unpaid: '<span class="badge badge-danger">غير مدفوع</span>'
+          };
+          tr.innerHTML = `
+            <td>#${inv.id}</td>
+            <td><span style="font-weight:700">${sub.name}</span></td>
+            <td>${sub.breakerOwnerName}</td>
+            <td style="font-weight:700">${inv.amperes} أمبير</td>
+            <td style="font-weight:700">${formatCurrency(inv.amountExpected)}</td>
+            <td style="font-weight:900" class="text-success">${formatCurrency(inv.amountReceived)}</td>
+            <td>${statusBadges[inv.status] || ''}</td>
+            <td>
+              <button class="btn btn-outline btn-icon" onclick="MawlidatiApp.showReceipt(${inv.id})" title="عرض الوصل الحراري">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </button>
+              <button class="btn btn-outline btn-icon text-danger" onclick="MawlidatiApp.deleteInvoice(${inv.id})" title="حذف الفاتورة">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+      async bulkGenerateInvoices() {
+        const genId = this.state.activeGeneratorId;
+        const currentGen = DB.get('generators').find(g => g.id === genId);
+        if (!currentGen) {
+          alert('الرجاء تسجيل مولد أولاً');
+          return;
+        }
+        const monthFilter = document.getElementById('invoice-month-filter').value;
+        if (!monthFilter) {
+          alert('الرجاء اختيار شهر التوليد');
+          return;
+        }
+        if (confirm(`هل تريد بالتأكيد توليد فواتير شهر ${monthFilter} لجميع المشتركين الفعالين؟`)) {
+          const subscribers = DB.get('subscribers').filter(s => Number(s.generatorId) === Number(genId) && s.status === 'active');
+          const invoices = DB.get('invoices');
+          let generated = 0;
+          let skipped = 0;
+          subscribers.forEach(sub => {
+            // Check if invoice already exists
+            const exists = invoices.find(inv => inv.subscriberId === sub.id && inv.monthYear === monthFilter);
+            if (exists) {
+              skipped++;
+              return;
+            }
+            const cost = sub.defaultAmperes * currentGen.pricePerAmpere;
+            const totalRequired = cost + sub.currentDebt;
+            const newId = invoices.length > 0 ? Math.max(...invoices.map(i => i.id)) + 1 : 1;
+            invoices.push({
+              id: newId,
+              subscriberId: sub.id,
+              generatorId: genId,
+              amperes: sub.defaultAmperes,
+              previousDebt: sub.currentDebt,
+              amountExpected: totalRequired,
+              amountReceived: 0,
+              monthYear: monthFilter,
+              status: 'unpaid',
+              notes: '',
+              createdAt: new Date().toISOString()
+            });
+            // Update subscriber's debt in DB
+            sub.currentDebt = totalRequired;
+            generated++;
+          });
+          // Save subscribers with updated debt
+          const allSubs = DB.get('subscribers');
+          subscribers.forEach(s => {
+            const idx = allSubs.findIndex(sub => sub.id === s.id);
+            if (idx !== -1) {
+              allSubs[idx].currentDebt = s.currentDebt;
+            }
+          });
+          DB.save('subscribers', allSubs);
+          DB.save('invoices', invoices);
+          if (this.state.apiUrl) {
+            await this.pushToCloud();
+          }
+          alert(`تم توليد ${generated} فاتورة للمشتركين الفعالين وتخطي ${skipped} فاتورة موجودة مسبقاً.`);
+          this.renderInvoices();
+        }
+      },
+      openRecordPaymentModal() {
+        const genId = this.state.activeGeneratorId;
+        const subscribers = DB.get('subscribers').filter(s => Number(s.generatorId) === Number(genId));
+        
+        const select = document.getElementById('payment-sub-select');
+        select.innerHTML = '<option value="">-- اختر مشتركاً للجباية --</option>';
+        
+        subscribers.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = `${s.name} (${s.breakerOwnerName})`;
+          select.appendChild(opt);
+        });
+        document.getElementById('payment-form').reset();
+        document.getElementById('payment-invoice-details').style.display = 'none';
+        document.getElementById('payment-modal').classList.add('open');
+      },
+      onPaymentSubscriberChange(subId) {
+        if (!subId) {
+          document.getElementById('payment-invoice-details').style.display = 'none';
+          return;
+        }
+        const genId = this.state.activeGeneratorId;
+        const generator = DB.get('generators').find(g => g.id === genId);
+        const sub = DB.get('subscribers').find(s => s.id === Number(subId));
+        
+        if (!sub || !generator) return;
+        const monthFilter = document.getElementById('invoice-month-filter').value;
+        
+        // Find existing invoice for this month or calculate expected values
+        const invoices = DB.get('invoices');
+        const invoice = invoices.find(inv => inv.subscriberId === sub.id && inv.monthYear === monthFilter);
+        let monthlyCost, oldDebt, totalExpected;
+        if (invoice) {
+          monthlyCost = invoice.amperes * generator.pricePerAmpere;
+          oldDebt = invoice.previousDebt;
+          totalExpected = invoice.amountExpected;
+          document.getElementById('payment-amount-received').value = invoice.amountReceived || '';
+          document.getElementById('payment-notes').value = invoice.notes || '';
+        } else {
+          monthlyCost = sub.defaultAmperes * generator.pricePerAmpere;
+          oldDebt = sub.currentDebt;
+          totalExpected = monthlyCost + oldDebt;
+          document.getElementById('payment-amount-received').value = '';
+          document.getElementById('payment-notes').value = '';
+        }
+        // Update Details DOM
+        document.getElementById('payment-monthly-cost').textContent = formatCurrency(monthlyCost);
+        document.getElementById('payment-old-debts').textContent = formatCurrency(oldDebt);
+        document.getElementById('payment-total-expected').textContent = formatCurrency(totalExpected);
+        
+        document.getElementById('payment-invoice-details').setAttribute('data-total-expected', totalExpected);
+        document.getElementById('payment-invoice-details').style.display = 'block';
+        this.onPaymentAmountChange(document.getElementById('payment-amount-received').value);
+      },
+      onPaymentAmountChange(amount) {
+        const totalExpected = Number(document.getElementById('payment-invoice-details').getAttribute('data-total-expected')) || 0;
+        const received = Number(amount) || 0;
+        const remaining = totalExpected - received;
+        document.getElementById('payment-balance-remaining').textContent = formatCurrency(remaining);
+        
+        const badge = document.getElementById('payment-status-badge');
+        badge.className = 'badge ';
+        if (received >= totalExpected && totalExpected > 0) {
+          badge.textContent = 'مدفوع';
+          badge.classList.add('badge-success');
+        } else if (received > 0) {
+          badge.textContent = 'جزئي';
+          badge.classList.add('badge-warning');
+        } else {
+          badge.textContent = 'غير مدفوع';
+          badge.classList.add('badge-danger');
+        }
+      },
+      async savePayment(e) {
+        e.preventDefault();
+        const subId = Number(document.getElementById('payment-sub-select').value);
+        const amountReceived = Number(document.getElementById('payment-amount-received').value) || 0;
+        const notes = document.getElementById('payment-notes').value;
+        const genId = this.state.activeGeneratorId;
+        const generator = DB.get('generators').find(g => g.id === genId);
+        const sub = DB.get('subscribers').find(s => s.id === subId);
+        
+        if (!sub || !generator) return;
+        const monthFilter = document.getElementById('invoice-month-filter').value;
+        const invoices = DB.get('invoices');
+        // Check if invoice exists for this month
+        let invoice = invoices.find(inv => inv.subscriberId === sub.id && inv.monthYear === monthFilter);
+        let previousDebt = 0;
+        let amountExpected = 0;
+        if (invoice) {
+          previousDebt = invoice.previousDebt;
+          amountExpected = invoice.amountExpected;
+          
+          // Revert previous invoice impact on subscriber debt
+          sub.currentDebt = sub.currentDebt - (invoice.amountExpected - invoice.amountReceived);
+          
+          invoice.amountReceived = amountReceived;
+          invoice.notes = notes;
+          invoice.status = amountReceived >= amountExpected ? 'paid' : (amountReceived > 0 ? 'partial' : 'unpaid');
+        } else {
+          const cost = sub.defaultAmperes * generator.pricePerAmpere;
+          previousDebt = sub.currentDebt;
+          amountExpected = cost + previousDebt;
+          
+          const newId = invoices.length > 0 ? Math.max(...invoices.map(i => i.id)) + 1 : 1;
+          invoice = {
+            id: newId,
+            subscriberId: sub.id,
+            generatorId: genId,
+            amperes: sub.defaultAmperes,
+            previousDebt,
+            amountExpected,
+            amountReceived,
+            monthYear: monthFilter,
+            status: amountReceived >= amountExpected ? 'paid' : (amountReceived > 0 ? 'partial' : 'unpaid'),
+            notes,
+            createdAt: new Date().toISOString()
+          };
+          invoices.push(invoice);
+        }
+        // Apply new invoice impact on subscriber debt
+        const remaining = amountExpected - amountReceived;
+        sub.currentDebt = remaining;
+        // Save to LocalStorage and push
+        const allSubs = DB.get('subscribers');
+        const sIdx = allSubs.findIndex(s => s.id === sub.id);
+        if (sIdx !== -1) {
+          allSubs[sIdx].currentDebt = remaining;
+        }
+        DB.save('subscribers', allSubs);
+        DB.save('invoices', invoices);
+        if (this.state.apiUrl) {
+          await this.pushToCloud();
+        }
+        this.closeModal('payment-modal');
+        this.renderInvoices();
+        // Instantly display the newly created receipt!
+        this.showReceipt(invoice.id);
+      },
+      async deleteInvoice(id) {
+        if (confirm('هل أنت متأكد من حذف هذه القائمة؟ سيتم إعادة تسوية ديون المشترك.')) {
+          const invoices = DB.get('invoices');
+          const idx = invoices.findIndex(inv => inv.id === id);
+          
+          if (idx !== -1) {
+            const inv = invoices[idx];
+            
+            // Revert subscriber's outstanding balance
+            const subscribers = DB.get('subscribers');
+            const sIdx = subscribers.findIndex(s => s.id === inv.subscriberId);
+            if (sIdx !== -1) {
+              const outstanding = inv.amountExpected - inv.amountReceived;
+              subscribers[sIdx].currentDebt = Math.max(0, subscribers[sIdx].currentDebt - outstanding);
+              DB.save('subscribers', subscribers);
+            }
+            invoices.splice(idx, 1);
+            DB.save('invoices', invoices);
+            if (this.state.apiUrl) {
+              await this.pushToCloud();
+            }
+            this.renderInvoices();
+          }
+        }
+      },
+      showReceipt(invId) {
+        const invoice = DB.get('invoices').find(inv => inv.id === invId);
+        if (!invoice) return;
+        const sub = DB.get('subscribers').find(s => s.id === invoice.subscriberId) || { name: 'غير معروف', breakerOwnerName: 'غير معروف', phoneNumber: '' };
+        const generator = DB.get('generators').find(g => g.id === invoice.generatorId) || { name: 'غير معروف', pricePerAmpere: 0 };
+        const balance = invoice.amountExpected - invoice.amountReceived;
+        const statusLabel = invoice.status === 'paid' ? 'مدفوع' : (invoice.status === 'partial' ? 'جزئي' : 'غير مدفوع');
+        // Formulate WhatsApp share message
+        const waMessage = `مرحباً السيد/ة ${sub.name} المحترم.
+وصل استلام أجور المولد (${generator.name}):
+----------------------------------
+رقم الوصل: ${invoice.id}
+التاريخ: ${formatDate(invoice.createdAt)}
+عدد الأمبيرات: ${invoice.amperes} أمبير
+سعر الأمبير: ${formatCurrency(generator.pricePerAmpere)}
+الديون السابقة: ${formatCurrency(invoice.previousDebt)}
+المبلغ المطلوب: ${formatCurrency(invoice.amountExpected)}
+المبلغ المستلم: ${formatCurrency(invoice.amountReceived)}
+المتبقي بذمتكم: ${formatCurrency(balance)}
+حالة الدفعة: ${statusLabel}
+----------------------------------
+شكراً لتسديدكم أجور الاشتراك.`;
+        let phone = sub.phoneNumber ? sub.phoneNumber.trim() : '';
+        if (phone.startsWith('07')) {
+          phone = '964' + phone.substring(1);
+        } else if (phone.startsWith('7')) {
+          phone = '964' + phone;
+        }
+        const waUrl = phone 
+          ? `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`
+          : `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
+        // Render HTML for receipt
+        const receiptHtml = `
+          <div class="receipt">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-200 via-white to-slate-200 border-b border-dashed border-slate-300"></div>
+            <h2 class="receipt-title">وصل استلام</h2>
+            <div style="font-size:0.75rem; margin-bottom:0.75rem;">
+              <div style="font-weight:bold">${generator.name}</div>
+              <div>التاريخ: ${formatDate(invoice.createdAt)}</div>
+            </div>
+            <div style="text-align:right; border-bottom:1px solid #000; padding-bottom:0.5rem; margin-bottom:0.5rem; font-size:0.75rem; line-height:1.4">
+              <div>المشترك: <b>${sub.name}</b></div>
+              <div>أبو الخبطة: <b>${sub.breakerOwnerName}</b></div>
+              ${sub.phoneNumber ? `<div>الهاتف: ${sub.phoneNumber}</div>` : ''}
+            </div>
+            <table style="width:100%; border:none;">
+              <tbody>
+                <tr>
+                  <td>الأمبيرية</td>
+                  <td style="text-align:left; font-weight:bold;">${invoice.amperes} أمبير</td>
+                </tr>
+                <tr>
+                  <td>سعر الأمبير</td>
+                  <td style="text-align:left;">${formatCurrency(generator.pricePerAmpere)}</td>
+                </tr>
+                <tr>
+                  <td>ديون سابقة</td>
+                  <td style="text-align:left; color:#ef4444;">${formatCurrency(invoice.previousDebt)}</td>
+                </tr>
+                <tr style="border-top:1px solid #000; font-weight:bold;">
+                  <td>المطلوب الكلي</td>
+                  <td style="text-align:left;">${formatCurrency(invoice.amountExpected)}</td>
+                </tr>
+                <tr>
+                  <td>المقبوض</td>
+                  <td style="text-align:left; font-weight:bold;">${formatCurrency(invoice.amountReceived)}</td>
+                </tr>
+                <tr style="border-top:1px solid #000; font-weight:bold;">
+                  <td>المتبقي</td>
+                  <td style="text-align:left; color:#ef4444;">${formatCurrency(balance)}</td>
+                </tr>
+                <tr>
+                  <td>الحالة</td>
+                  <td style="text-align:left; font-weight:bold;">${statusLabel}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="invoice-number-box">رقم الوصل: #${invoice.id}</div>
+            
+            <div style="margin-top:1rem; font-size:0.65rem; color:#64748b; font-weight:bold;">شكراً لتعاملكم معنا</div>
+            
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-200 via-white to-slate-200 border-t border-dashed border-slate-300"></div>
+          </div>
+          <div class="receipt-modal-actions" style="display:flex; flex-direction:column; gap:0.5rem; margin-top:1rem;">
+            <button class="btn btn-primary" onclick="window.print()" style="width:100%;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:5px;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              طباعة الوصل الحراري
+            </button>
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" style="width:100%; text-decoration:none;">
+              <button class="btn btn-success" style="width:100%; background-color:#25D366; color:white; display:flex; justify-content:center; align-items:center;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                إرسال عبر واتساب
+              </button>
+            </a>
+          </div>
+        `;
+        document.getElementById('receipt-print-wrapper').innerHTML = receiptHtml;
+        document.getElementById('receipt-modal').classList.add('open');
+      },
+      // --- EXPENSES ACTIONS ---
+      renderExpenses() {
+        const expenses = DB.get('expenses');
+        const genId = this.state.activeGeneratorId;
+        const filtered = expenses.filter(exp => Number(exp.generatorId) === Number(genId));
+        const tbody = document.getElementById('expenses-table-body');
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 3rem;">لا توجد مصاريف مسجلة</td></tr>';
+          return;
+        }
+        filtered.forEach(exp => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${formatDate(exp.date)}</td>
+            <td style="font-weight:700">${exp.expenseType}</td>
+            <td style="font-weight:900" class="text-danger">${formatCurrency(exp.amount)}</td>
+            <td>${exp.notes || '-'}</td>
+            <td>
+              <button class="btn btn-outline btn-icon" onclick="MawlidatiApp.openExpenseModal(${exp.id})">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              </button>
+              <button class="btn btn-outline btn-icon text-danger" onclick="MawlidatiApp.deleteExpense(${exp.id})">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+      openExpenseModal(id = null) {
+        document.getElementById('expense-form').reset();
+        document.getElementById('expense-id').value = '';
+        document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+        if (id) {
+          document.getElementById('expense-modal-title').textContent = 'تعديل المصروف';
+          const exp = DB.get('expenses').find(e => e.id === id);
+          if (exp) {
+            document.getElementById('expense-id').value = exp.id;
+            document.getElementById('exp-type').value = exp.expenseType;
+            document.getElementById('exp-amount').value = exp.amount;
+            document.getElementById('exp-date').value = exp.date;
+            document.getElementById('exp-notes').value = exp.notes || '';
+          }
+        } else {
+          document.getElementById('expense-modal-title').textContent = 'تسجيل مصروف جديد';
+        }
+        document.getElementById('expense-modal').classList.add('open');
+      },
+      async saveExpense(e) {
+        e.preventDefault();
+        const id = document.getElementById('expense-id').value;
+        const expenseType = document.getElementById('exp-type').value;
+        const amount = Number(document.getElementById('exp-amount').value);
+        const date = document.getElementById('exp-date').value;
+        const notes = document.getElementById('exp-notes').value;
+        const exps = DB.get('expenses');
+        if (id) {
+          const idx = exps.findIndex(e => e.id === Number(id));
+          if (idx !== -1) {
+            exps[idx].expenseType = expenseType;
+            exps[idx].amount = amount;
+            exps[idx].date = date;
+            exps[idx].notes = notes || null;
+          }
+        } else {
+          const newId = exps.length > 0 ? Math.max(...exps.map(e => e.id)) + 1 : 1;
+          exps.push({
+            id: newId,
+            generatorId: this.state.activeGeneratorId,
+            expenseType,
+            amount,
+            date,
+            notes: notes || null,
+            createdAt: new Date().toISOString()
+          });
+        }
+        await this.persistTable('expenses', exps);
+        this.closeModal('expense-modal');
+        this.renderExpenses();
+      },
+      async deleteExpense(id) {
+        if (confirm('هل أنت متأكد من حذف هذا المصروف؟')) {
+          const exps = DB.get('expenses').filter(e => e.id !== id);
+          await this.persistTable('expenses', exps);
+          this.renderExpenses();
+        }
+      },
+      // --- GENERATORS ACTIONS ---
+      renderGenerators() {
+        const generators = DB.get('generators');
+        const subscribers = DB.get('subscribers');
+        const grid = document.getElementById('generators-list-box');
+        grid.innerHTML = '';
+        generators.forEach(gen => {
+          const subCount = subscribers.filter(s => Number(s.generatorId) === Number(gen.id)).length;
+          
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <div class="item-header">
+              <div>
+                <span class="item-title">${gen.name}</span>
+                <div class="item-meta">المشتركون: ${subCount} مشترك</div>
+              </div>
+            </div>
+            <div class="item-footer">
+              <div style="font-size:0.85rem; color:var(--text-muted)">سعر الأمبير:</div>
+              <div style="font-weight:900; font-size:1.15rem; color:var(--primary)">${formatCurrency(gen.pricePerAmpere)}</div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
+              <button class="btn btn-outline btn-icon" onclick="MawlidatiApp.openGeneratorModal(${gen.id})">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              </button>
+              <button class="btn btn-outline btn-icon text-danger" onclick="MawlidatiApp.deleteGenerator(${gen.id})">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              </button>
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+      },
+      openGeneratorModal(id = null) {
+        document.getElementById('generator-form').reset();
+        document.getElementById('generator-id').value = '';
+        if (id) {
+          document.getElementById('generator-modal-title').textContent = 'تعديل بيانات المولد';
+          const gen = DB.get('generators').find(g => g.id === id);
+          if (gen) {
+            document.getElementById('generator-id').value = gen.id;
+            document.getElementById('gen-name').value = gen.name;
+            document.getElementById('gen-price').value = gen.pricePerAmpere;
+          }
+        } else {
+          document.getElementById('generator-modal-title').textContent = 'إضافة مولد جديد';
+        }
+        document.getElementById('generator-modal').classList.add('open');
+      },
+      async saveGenerator(e) {
+        e.preventDefault();
+        const id = document.getElementById('generator-id').value;
+        const name = document.getElementById('gen-name').value;
+        const price = Number(document.getElementById('gen-price').value);
+        const gens = DB.get('generators');
+        if (id) {
+          const idx = gens.findIndex(g => g.id === Number(id));
+          if (idx !== -1) {
+            gens[idx].name = name;
+            gens[idx].pricePerAmpere = price;
+          }
+        } else {
+          const newId = gens.length > 0 ? Math.max(...gens.map(g => g.id)) + 1 : 1;
+          gens.push({
+            id: newId,
+            name,
+            pricePerAmpere: price,
+            createdAt: new Date().toISOString()
+          });
+        }
+        await this.persistTable('generators', gens);
+        this.closeModal('generator-modal');
+        
+        // Update Selector and Refresh List
+        this.renderGeneratorDropdown();
+        this.renderGenerators();
+      },
+      async deleteGenerator(id) {
+        const gens = DB.get('generators');
+        if (gens.length <= 1) {
+          alert('يجب الإبقاء على مولد واحد مسجل على الأقل.');
+          return;
+        }
+        if (confirm('تنبيه: سيؤدي حذف المولد إلى إلغاء كافة المشتركين والحسابات المرتبطة به. هل تريد الاستمرار؟')) {
+          const updatedGens = gens.filter(g => g.id !== id);
+          DB.save('generators', updatedGens);
+          // Clean up database tables for deleted generator
+          const subs = DB.get('subscribers').filter(s => s.generatorId !== id);
+          const invs = DB.get('invoices').filter(i => i.generatorId !== id);
+          const exps = DB.get('expenses').filter(e => e.generatorId !== id);
+          DB.save('subscribers', subs);
+          DB.save('invoices', invs);
+          DB.save('expenses', exps);
+          // Reset active generator ID
+          this.state.activeGeneratorId = updatedGens[0].id;
+          const settings = DB.get('settings', {});
+          settings.activeGeneratorId = updatedGens[0].id;
+          DB.save('settings', settings);
+          if (this.state.apiUrl) {
+            await this.pushToCloud();
+          }
+          this.renderGeneratorDropdown();
+          this.renderGenerators();
+        }
+      },
+      // --- BACKUP & RESTORE ACTIONS ---
+      exportBackupData() {
+        const backup = DB.exportBackup();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        
+        const timestamp = new Date().toISOString().split('T')[0];
+        downloadAnchor.setAttribute("download", `mawlidati_backup_${timestamp}.json`);
+        
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      },
+      importBackupData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validate basic structure
+            if (data.generators && data.subscribers && data.invoices) {
+              DB.importBackup(data);
+              
+              if (MawlidatiApp.state.apiUrl) {
+                await MawlidatiApp.pushToCloud();
+              }
+              alert('تم استيراد النسخة الاحتياطية بنجاح بنسبة 100%!');
+              window.location.reload();
+            } else {
+              alert('فشل الاستيراد: ملف النسخ الاحتياطي غير صالح أو تالف.');
+            }
+          } catch(err) {
+            alert('فشل استيراد الملف. يرجى التأكد من اختيار ملف JSON صحيح.');
+          }
+        };
+        reader.readAsText(file);
+      },
+      async resetAllDatabase() {
+        if (confirm('تحذير شديد: سيتم حذف كافة البيانات المسجلة، الفواتير، المشتركين والمولدات وإرجاع النظام إلى وضعه الأصلي. هل تريد الاستمرار؟')) {
+          DB.clear();
+          if (this.state.apiUrl) {
+            await this.pushToCloud();
+          }
+          window.location.reload();
+        }
+      }
+    };
+    // Load App on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      MawlidatiApp.init();
+    });
+  </script>
+</body>
+</html>
